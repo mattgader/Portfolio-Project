@@ -1,14 +1,6 @@
-# Author: Matt Gader
-# Date: 8/5/2021
-# Description: Class QuoridorGame which allows to players to play a game of Quoridor. After initializing
-# a game, two players take turns either moving their pawn on the board or placing fences to obstruct the
-# opponent. The object of the game is to reach the opponent's baseline (starting row) first.
-
-
 class QuoridorGame:
-
     """
-    Represents a QuoridorGame object which is used to play a game of Quoridor with two players.
+    Represents a QuoridorGame object which is used to play a game of quoridor with two players.
     A game is initialized with a representation of the board containing two pawns, with player one's
     pawn starting on tile (4, 0) and player two's pawn starting on tile (4, 8). The player's alternate
     turns, which can either move the pawn or place a fence (which obstructs pawn movement). Pawns are
@@ -29,7 +21,7 @@ class QuoridorGame:
         self._board = [['+==', '+==', '+==', '+==', '+==', '+==', '+==', '+==', '+==', '+'],
                        ['|  ', '   ', '   ', '   ', ' P1', '   ', '   ', '   ', '   ', '|'],
                        ['+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+'],
-                       ['|  ', '   ', '   ', '   ', '   ', '   ', '   ', '   ', '   ', '|'],
+                       ['|  ', '   ', '   ', '   ', '|  ', '|  ', '   ', '   ', '   ', '|'],
                        ['+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+'],
                        ['|  ', '   ', '   ', '   ', '   ', '   ', '   ', '   ', '   ', '|'],
                        ['+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+'],
@@ -45,12 +37,20 @@ class QuoridorGame:
                        ['+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+  ', '+'],
                        ['|  ', '   ', '   ', '   ', ' P2', '   ', '   ', '   ', '   ', '|'],
                        ['+==', '+==', '+==', '+==', '+==', '+==', '+==', '+==', '+==', '+']]
+        self._fairplay_board = [[False, False, False, False, False, False, False, False, False, ],
+                                [False, False, False, False, False, False, False, False, False, ],
+                                [False, False, False, False, False, False, False, False, False, ],
+                                [False, False, False, False, False, False, False, False, False, ],
+                                [False, False, False, False, False, False, False, False, False, ],
+                                [False, False, False, False, False, False, False, False, False, ],
+                                [False, False, False, False, False, False, False, False, False, ],
+                                [False, False, False, False, False, False, False, False, False, ],
+                                [False, False, False, False, False, False, False, False, False, ]]
+        self._fairplay_board1 = []
         self._turn = 1
         self._p1 = (4, 0)
         self._p2 = (4, 8)
         self._player = self._p1
-        self._opponent = self._p2
-        self._opponent_piece = ' P2'   # necessary?
         self._p1Fences = 10
         self._p2Fences = 10
         self._winner = None
@@ -67,7 +67,7 @@ class QuoridorGame:
         Determines whether or not a player's move is valid by
         checking if the move is out of bounds, calling correct_turn
         to determine if the move was made in turn, calling move_direction,
-        which return False if the move is invalid and checking if the opponent's
+        which returns False if the move is invalid and checking if the opponent's
         pawn is already occupying the move position. If the move passes all of
         these checks, valid_move is called to implement the move and check_for_win
         is called to check if the game has been won
@@ -84,7 +84,7 @@ class QuoridorGame:
             return False
         if self.move_direction(x, y) is False:
             return False
-        if self._opponent_piece in self.pawn_conversion(x, y):
+        if 'P' in self.pawn_conversion(x, y):
             return False
         else:
             self.valid_move(turn, x, y)
@@ -100,7 +100,7 @@ class QuoridorGame:
             y_source = self._p1[1]
             self._p1 = (x, y)
             self._turn = 2
-        else:
+        elif turn == 2:
             x_source = self._p2[0]
             y_source = self._p2[1]
             self._p2 = (x, y)
@@ -132,12 +132,8 @@ class QuoridorGame:
             return False
         if turn == 1:
             self._player = self._p1
-            self._opponent = self._p2
-            self._opponent_piece = 'P2'
         else:
             self._player = self._p2
-            self._opponent = self._p1
-            self._opponent_piece = 'P1'
 
     def move_direction(self, x, y):
         """
@@ -220,9 +216,11 @@ class QuoridorGame:
                 return False
         elif self._player[0] - x == 1:
             if '|' in self.vert_fence_conversion(x + 1, y):
+                print("fence left")
                 return False
         elif self._player[0] - x == -1:
             if '|' in self.vert_fence_conversion(x, y):
+                print("fence right")
                 return False
 
     def vert_jump_check(self, x, y):
@@ -230,18 +228,19 @@ class QuoridorGame:
         Checks if vertical jump is valid
         """
         if self._player[1] - y == 2:
-            if self._opponent_piece not in self.pawn_conversion(x, y + 1):
+            if 'P' not in self.pawn_conversion(x, y + 1):
                 return False
             elif self.hor_fence_conversion(x, y + 2) == '+==':
                 return False
             elif self.hor_fence_conversion(x, y + 1) == "+==":
                 return False
         else:
-            if self._opponent_piece not in self.pawn_conversion(x, y - 1):
+            if 'P' not in self.pawn_conversion(x, y - 1):
                 return False
             elif self.hor_fence_conversion(x, y - 1) == '+==':
                 return False
             elif self.hor_fence_conversion(x, y) == "+==":
+                print("jump down fence")
                 return False
 
     def hor_jump_check(self, x, y):
@@ -249,14 +248,14 @@ class QuoridorGame:
         Checks if horizontal jump is valid
         """
         if self._player[0] - x == 2:
-            if self._opponent_piece not in self.pawn_conversion(x + 1, y):
+            if 'P' not in self.pawn_conversion(x + 1, y):
                 return False
             elif '|' in self.vert_fence_conversion(x + 2, y):
                 return False
             elif '|' in self.vert_fence_conversion(x + 1, y):
                 return False
         else:
-            if self._opponent_piece not in self.pawn_conversion(x - 1, y):
+            if 'P' not in self.pawn_conversion(x - 1, y):
                 return False
             elif '|' in self.vert_fence_conversion(x - 1, y):
                 return False
@@ -285,16 +284,16 @@ class QuoridorGame:
                 if self.up_left_check(x, y) is not True:
                     return False
 
-    def up_right_check(self, x, y):
+    def up_right_check(self, x, y):    # these checks will return True
         """
         Checks validity of up right move
         """
-        if self._opponent_piece in self.pawn_conversion(x - 1, y):
+        if 'P' in self.pawn_conversion(x - 1, y):
             if self.hor_fence_conversion(x - 1, y) == '+==':
                 if self.hor_fence_conversion(x - 1, y + 1) != '+==':
                     if '|' not in self.vert_fence_conversion(x, y):
                         return True
-        elif self._opponent_piece in self.pawn_conversion(x, y + 1):
+        elif 'P' in self.pawn_conversion(x, y + 1):
             if '|' in self.vert_fence_conversion(x + 1, y + 1):
                 if '|' not in self.vert_fence_conversion(x, y + 1):
                     if self.hor_fence_conversion(x, y + 1) != '+==':
@@ -304,12 +303,12 @@ class QuoridorGame:
         """
         Checks validity of down right move
         """
-        if self._opponent_piece in self.pawn_conversion(x, y - 1):
+        if 'P' in self.pawn_conversion(x, y - 1):
             if '|' in self.vert_fence_conversion(x + 1, y - 1):
                 if '|' not in self.vert_fence_conversion(x, y - 1):
                     if self.hor_fence_conversion(x, y) != '+==':
                         return True
-        elif self._opponent_piece in self.pawn_conversion(x - 1, y):
+        elif 'P' in self.pawn_conversion(x - 1, y):
             if self.hor_fence_conversion(x - 1, y + 1) == '+==':
                 if self.hor_fence_conversion(x - 1, y) != '+==':
                     if '|' not in self.vert_fence_conversion(x, y):
@@ -319,12 +318,12 @@ class QuoridorGame:
         """
         Checks validity of down left move
         """
-        if self._opponent_piece in self.pawn_conversion(x + 1, y):
+        if 'P' in self.pawn_conversion(x + 1, y):
             if self.hor_fence_conversion(x + 1, y + 1) == '+==':
                 if self.hor_fence_conversion(x + 1, y) != '+==':
                     if '|' not in self.vert_fence_conversion(x + 1, y):
                         return True
-        elif self._opponent_piece in self.pawn_conversion(x, y - 1):
+        elif 'P' in self.pawn_conversion(x, y - 1):
             if '|' in self.vert_fence_conversion(x, y - 1):
                 if '|' not in self.vert_fence_conversion(x + 1, y - 1):
                     if self.hor_fence_conversion(x, y) != '+==':
@@ -334,12 +333,12 @@ class QuoridorGame:
         """
         Checks validity of up left move
         """
-        if self._opponent_piece in self.pawn_conversion(x, y + 1):
+        if 'P' in self.pawn_conversion(x, y + 1):
             if '|' in self.vert_fence_conversion(x, y + 1):
                 if '|' not in self.vert_fence_conversion(x + 1, y + 1):
                     if self.hor_fence_conversion(x, y + 1) != '+==':
                         return True
-        if self._opponent_piece in self.pawn_conversion(x + 1, y):
+        if 'P' in self.pawn_conversion(x + 1, y):
             if self.hor_fence_conversion(x + 1, y) == '+==':
                 if self.hor_fence_conversion(x + 1, y + 1) != '+==':
                     if '|' not in self.vert_fence_conversion(x + 1, y):
@@ -353,23 +352,17 @@ class QuoridorGame:
         fence placement is valid, and updates player's fence
         count if placement is valid
         """
-
+        x = position[0]
+        y = position[1]
         if self.correct_turn(turn) is False:
             return False
-        elif self.fences_left(turn) is False:
+        elif self.remaining_fences(turn) is False:
             return False
         elif self.fence_check(direction, position) is False:
             return False
-        if turn == 1:
-            self._p1Fences -= 1
-            self._turn = 2
-            return True
-        else:
-            self._p2Fences -= 1
-            self._turn = 1
-            return True
+        return self.is_fairplay(turn, direction, x, y)
 
-    def fences_left(self, turn):
+    def remaining_fences(self, turn):
         """
         Checks if player has any fences left to place
         """
@@ -394,7 +387,7 @@ class QuoridorGame:
                 xf = y * 2
                 yf = x
                 self._board[xf][yf] = '+=='
-        if direction == 'v':
+        elif direction == 'v':
             if '|' in self.vert_fence_conversion(x, y):
                 return False
             else:
@@ -406,6 +399,86 @@ class QuoridorGame:
                     self._board[xf][yf] = '|P2'
                 else:
                     self._board[xf][yf] = '|  '
+
+    def remove_fence(self, direction, x, y):
+        """"""
+        if direction == "h":
+            xf = y * 2
+            yf = x
+            self._board[xf][yf] = '+  '
+        elif direction == 'v':
+            xf = y * 2 + 1
+            yf = x
+            if 'P1' in self._board[xf][yf]:
+                self._board[xf][yf] = ' P1'
+            elif 'P2' in self._board[xf][yf]:
+                self._board[xf][yf] = ' P2'
+            else:
+                self._board[xf][yf] = '   '
+
+    def is_fairplay(self, turn, direction, x, y):
+        """"""
+        import copy
+        self._fairplay_board1 = copy.deepcopy(self._fairplay_board)
+        if turn == 1:
+            x1 = self._p2[0]
+            y1 = self._p2[1]
+            if self.rec_fairplay(1, x1, y1) is not True:
+                print('Breaks Fairplay Rules')
+                self.remove_fence(direction, x, y)
+                return 'breaks the fair play rule'
+            else:
+                self._p1Fences -= 1
+                self._turn = 2
+                return True
+        elif turn == 2:
+            x2 = self._p1[0]
+            y2 = self._p1[1]
+            if self.rec_fairplay(2, x2, y2) is not True:
+                self.remove_fence(direction, x, y)
+                return 'breaks the fair play rule'
+            else:
+                self._p2Fences -= 1
+                self._turn = 1
+                return True
+
+
+    def rec_fairplay(self, turn, x, y):
+        """"""
+        # print(x, y)
+        self._fairplay_board1[y][x] = True
+        # self.print_fairplay_board()
+        paintUp = False
+        paintRight = False
+        paintDown = False
+        paintLeft = False
+        if turn == 1:
+            if True in self._fairplay_board1[0]:
+                return True
+        elif turn == 2:
+            if True in self._fairplay_board1[8]:
+                return True
+
+        if self.hor_fence_conversion(x, y) != '+==':
+            if self._fairplay_board1[y - 1][x] is False:
+                paintUp = self.rec_fairplay(turn, x, y - 1)
+
+        if self.hor_fence_conversion(x, y + 1) != '+==':
+            if self._fairplay_board1[y + 1][x] is False:
+                paintDown = self.rec_fairplay(turn, x, y + 1)
+
+        if '|' not in self.vert_fence_conversion(x + 1, y):
+            if self._fairplay_board1[y][x + 1] is False:
+                paintRight = self.rec_fairplay(turn, x + 1, y)
+
+        if '|' not in self.vert_fence_conversion(x, y):
+            if self._fairplay_board1[y][x - 1] is False:
+                paintLeft = self.rec_fairplay(turn, x - 1, y)
+
+        if paintUp or paintRight or paintDown or paintLeft is True:
+            return True
+
+
 
     def check_for_win(self, turn, y):
         """
@@ -430,41 +503,27 @@ class QuoridorGame:
 
 
 def main():
-    """
-    Tests QuoridorGame by playing a game
-    """
+
+
     q = QuoridorGame()
     print(q.move_pawn(1, (4, 1)))
-    print(q.move_pawn(2, (4, 7)))
-    print(q.move_pawn(1, (4, 2)))
-    print(q.move_pawn(2, (4, 6)))
-    print(q.move_pawn(1, (4, 3)))
-    print(q.move_pawn(2, (4, 5)))
-    print(q.place_fence(1, 'h', (4, 5)))
-    print(q.move_pawn(2, (3, 5)))
-    print(q.move_pawn(1, (4, 4)))
-    print(q.place_fence(2, 'h', (5, 5)))
-    print(q.move_pawn(1, (3, 4)))
+    # print(q.move_pawn(2, (5, 8)))
+    # print(q.move_pawn(1, (4, 2)))
 
-    print(q.place_fence(2, 'h', (3, 4)))
-    print(q.place_fence(1, 'v', (3, 5)))
-    print(q.move_pawn(2, (2, 4)))
+    print(q.place_fence(2, 'h', (4, 1)))
 
-    # print(q.move_pawn(2, (3, 3)))
-    # print(q.move_pawn(1, (3, 5)))
-    # print(q.move_pawn(2, (3, 2)))
-    # print(q.move_pawn(1, (3, 6)))
-    # print(q.move_pawn(2, (3, 1)))
-    # print(q.place_fence(1, 'h', (3, 1)))
-    # print(q.move_pawn(2, (4, 1)))
-    # print(q.move_pawn(1, (3, 7)))
-    # print(q.move_pawn(2, (4, 0)))
-    # print(q.is_winner(2))
-    # print(q.move_pawn(1, (3, 8)))
+    # print(q.move_pawn(2, (4, 6)))
+    # print(q.move_pawn(1, (4, 3)))
+    # print(q.move_pawn(2, (4, 5)))
+    print(q.place_fence(1, 'h', (7, 5)))
+    print(q.place_fence(2, 'h', (4, 2)))
+    # print(q.move_pawn(1, (6, 7)))
+    # q.print_fairplay_board()
     q.print_board()
 
-    # print(q.move_pawn(1, (4, 2)))
 
 
 if __name__ == '__main__':
     main()
+
+
