@@ -6,7 +6,7 @@
 
 class QuoridorGame:
     """
-    Represents a QuoridorGame object which is used to play a game of quoridor with two players.
+    This represents a QuoridorGame object which is used to play a game of quoridor with two players.
     A game is initialized with a representation of the board containing two pawns, with player one's
     pawn starting on tile (4, 0) and player two's pawn starting on tile (4, 8). The player's alternate
     turns, which can either move the pawn or place a fence (which obstructs pawn movement). Pawns are
